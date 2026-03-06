@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Geist, Geist_Mono, Playfair_Display } from 'next/font/google';
 
 import { dehydrate } from '@tanstack/react-query';
 
@@ -29,6 +29,13 @@ const mono = Geist_Mono({
   subsets: ['latin'],
 });
 
+const serif = Playfair_Display({
+  display: 'swap',
+  variable: '--font-serif',
+  weight: ['400', '500', '700'],
+  subsets: ['latin'],
+});
+
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -39,28 +46,17 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(env.SITE_URL),
   title: {
-    default: 'Front-End Development',
-    template: '%s | Front-End Development',
+    default: 'Bible Cards',
+    template: '%s | Bible Cards',
   },
-  description: 'Front-End Development',
+  description: 'Explore the Bible through beautifully crafted vintage trading cards.',
   openGraph: {
     type: 'website',
     url: '/',
-    siteName: 'Frontend Development',
-    images: [
-      {
-        url: '/static/frontend-dev-thumbnail.png',
-        width: 1200,
-        height: 630,
-        alt: 'Front-End Development',
-      },
-    ],
+    siteName: 'Bible Cards',
   },
   twitter: {
     card: 'summary_large_image',
-  },
-  icons: {
-    icon: '/static/frontend-dev-icon.png',
   },
 };
 
@@ -73,7 +69,9 @@ function RootLayout({ children }: LayoutProps<'/'>) {
       lang="en"
       suppressHydrationWarning
     >
-      <body className={cn(sans.variable, mono.variable, 'flex flex-col min-h-dvh', 'font-sans antialiased')}>
+      <body
+        className={cn(sans.variable, mono.variable, serif.variable, 'flex flex-col min-h-dvh', 'font-sans antialiased')}
+      >
         <Providers dehydratedState={dehydratedState}>
           <Header />
           <main className="grow">{children}</main>
