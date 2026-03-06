@@ -7,7 +7,7 @@ import { ChevronRight } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
-import { getBookById } from '@/data/static/books';
+import { getBookBySlug } from '@/data/static/books';
 
 export function BreadcrumbNav() {
   const pathname = usePathname();
@@ -15,11 +15,20 @@ export function BreadcrumbNav() {
 
   if (segments.length === 0) return null;
 
-  const crumbs: { label: string; href: string }[] = [{ label: 'Books', href: '/' }];
+  const crumbs: { label: string; href: string }[] = [];
 
-  if (segments[0]) {
-    const bookData = getBookById(segments[0]);
+  if (segments[0] === 'old' || segments[0] === 'new') {
+    const testamentLabel = segments[0] === 'old' ? 'Old Testament' : 'New Testament';
+    crumbs.push({ label: testamentLabel, href: `/${segments[0]}` });
+  } else if (segments[0]) {
+    const bookData = getBookBySlug(segments[0]);
     const bookName = bookData?.name ?? segments[0];
+
+    if (bookData) {
+      const testamentLabel = bookData.testament === 'old' ? 'Old Testament' : 'New Testament';
+      crumbs.push({ label: testamentLabel, href: `/${bookData.testament}` });
+    }
+
     crumbs.push({ label: bookName, href: `/${segments[0]}` });
 
     if (segments[1] && segments[2]) {
@@ -40,12 +49,10 @@ export function BreadcrumbNav() {
               key={crumb.href}
               className="flex items-center gap-1.5"
             >
-              {index > 0 && (
-                <ChevronRight
-                  className="size-3 text-muted-foreground/50"
-                  aria-hidden="true"
-                />
-              )}
+              <ChevronRight
+                className="size-3 text-muted-foreground/50"
+                aria-hidden="true"
+              />
               {isLast ? (
                 <span
                   className="text-foreground"

@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 
-import { GridBook } from '@/components/common/grid/grid-book';
+import Link from 'next/link';
 
-import { bibleBooks } from '@/data/static/books';
+import { CardBible } from '@/components/common/card/card-bible';
+
+import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
   title: 'Books of the Bible',
@@ -11,9 +13,35 @@ export const metadata: Metadata = {
 
 export default function Page(_: PageProps<'/'>) {
   return (
-    <section className="mx-auto max-w-7xl py-8">
-      <h1 className="sr-only">Books of the Bible</h1>
-      <GridBook books={bibleBooks} />
-    </section>
+    <div className={cn('grid h-full grid-rows-2', 'lg:grid-cols-2 lg:grid-rows-1')}>
+      <Link
+        href="/old"
+        className={cn(
+          'group relative',
+          'flex items-center justify-center',
+          'border-b border-border/30 lg:border-r lg:border-b-0',
+          'transition-colors hover:bg-secondary/20',
+        )}
+      >
+        <div className="w-full max-w-[200px] p-4 sm:max-w-[280px] sm:p-8">
+          <CardBible>
+            <p className={cn('text-center text-xl font-medium', 'text-vintage-ink')}>Old Testament</p>
+            <p className={cn('mt-2 text-center text-xs', 'text-vintage-ink/50 font-sans')}>39 Books</p>
+          </CardBible>
+        </div>
+      </Link>
+
+      <Link
+        href="/new"
+        className={cn('group relative', 'flex items-center justify-center', 'transition-colors hover:bg-secondary/20')}
+      >
+        <div className="w-full max-w-[200px] p-4 sm:max-w-[280px] sm:p-8">
+          <CardBible>
+            <p className={cn('text-center text-xl font-medium', 'text-vintage-ink')}>New Testament</p>
+            <p className={cn('mt-2 text-center text-xs', 'text-vintage-ink/50 font-sans')}>27 Books</p>
+          </CardBible>
+        </div>
+      </Link>
+    </div>
   );
 }

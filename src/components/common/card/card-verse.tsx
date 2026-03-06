@@ -10,7 +10,7 @@ import { springSnappy } from '@/lib/spring-presets';
 import { cn } from '@/lib/utils';
 
 interface CardVerseProps {
-  bookId: string;
+  bookSlug: string;
   bookName: string;
   chapter: number;
   verse: number;
@@ -18,7 +18,7 @@ interface CardVerseProps {
   index: number;
 }
 
-export function CardVerse({ bookId, bookName, chapter, verse, text, index }: CardVerseProps) {
+export function CardVerse({ bookSlug, bookName, chapter, verse, text, index }: CardVerseProps) {
   const truncatedText = text.length > 80 ? `${text.slice(0, 80)}...` : text;
 
   return (
@@ -26,12 +26,11 @@ export function CardVerse({ bookId, bookName, chapter, verse, text, index }: Car
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: Math.min(index * 0.015, 0.5), ...springSnappy }}
-      whileHover={{ scale: 1.04, rotate: 0, zIndex: 10 }}
-      style={{ rotate: (index % 2 === 0 ? -1.5 : 1.5) * (1 + (index % 2)) }}
+      whileHover={{ scale: 1.04, zIndex: 10 }}
       className="relative"
     >
       <Link
-        href={`/${bookId}/${chapter}/${verse}`}
+        href={`/${bookSlug}/${chapter}/${verse}`}
         className="block focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring rounded-2xl"
       >
         <CardBible>

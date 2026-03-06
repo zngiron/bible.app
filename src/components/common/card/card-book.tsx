@@ -22,11 +22,10 @@ export function CardBook({ book, index }: CardBookProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.02, ...springSnappy }}
-      whileHover={{ scale: 1.04, rotate: 0 }}
-      style={{ rotate: (index % 2 === 0 ? -1 : 1) * (1 + (index % 3)) }}
+      whileHover={{ scale: 1.04 }}
     >
       <Link
-        href={`/${book.id}`}
+        href={`/${book.slug}`}
         className="block focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring rounded-2xl"
       >
         <CardBible>
@@ -44,17 +43,6 @@ export function CardBook({ book, index }: CardBookProps) {
           <p className={cn('mt-1 text-center text-xs', 'text-vintage-ink/50 font-sans')}>
             {book.chapterCount} {book.chapterCount === 1 ? 'chapter' : 'chapters'}
           </p>
-          <span
-            className={cn(
-              'mt-3 inline-block px-2 py-0.5 rounded-full',
-              'text-[10px] uppercase tracking-wider font-sans',
-              book.testament === 'old'
-                ? 'bg-vintage-gold/15 text-vintage-ink/50'
-                : 'bg-vintage-border/20 text-vintage-ink/50',
-            )}
-          >
-            {book.testament === 'old' ? 'Old Testament' : 'New Testament'}
-          </span>
         </CardBible>
       </Link>
     </motion.div>

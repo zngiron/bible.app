@@ -8,8 +8,8 @@ export function Header() {
   return (
     <header
       className={cn(
-        'sticky top-0 z-50',
-        'flex items-center justify-between h-14 px-4',
+        'shrink-0 z-50',
+        'flex items-center gap-2 h-14 px-4',
         'bg-background/80 backdrop-blur-sm',
         'border-b border-border/50',
       )}
@@ -18,7 +18,7 @@ export function Header() {
         href="/"
         className={cn('text-sm font-serif font-medium', 'text-foreground')}
       >
-        Bible Cards
+        Project Bible
       </Link>
       <BreadcrumbNav />
     </header>

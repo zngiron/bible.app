@@ -6,8 +6,6 @@ import { dehydrate } from '@tanstack/react-query';
 
 import { Providers } from '@/components/core/providers';
 import { Scripts } from '@/components/core/scripts';
-import { Footer } from '@/components/layout/footer';
-import { Header } from '@/components/layout/header';
 
 import { getQueryClient } from '@/lib/client';
 import { env } from '@/lib/env';
@@ -46,14 +44,14 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(env.SITE_URL),
   title: {
-    default: 'Bible Cards',
-    template: '%s | Bible Cards',
+    default: 'Project Bible',
+    template: '%s | Project Bible',
   },
   description: 'Explore the Bible through beautifully crafted vintage trading cards.',
   openGraph: {
     type: 'website',
     url: '/',
-    siteName: 'Bible Cards',
+    siteName: 'Project Bible',
   },
   twitter: {
     card: 'summary_large_image',
@@ -70,12 +68,22 @@ function RootLayout({ children }: LayoutProps<'/'>) {
       suppressHydrationWarning
     >
       <body
-        className={cn(sans.variable, mono.variable, serif.variable, 'flex flex-col min-h-dvh', 'font-sans antialiased')}
+        className={cn(
+          sans.variable,
+          mono.variable,
+          serif.variable,
+          'flex flex-col h-[100dvh] overflow-hidden',
+          'font-sans antialiased',
+        )}
+        style={{
+          paddingTop: 'env(safe-area-inset-top)',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+          paddingLeft: 'env(safe-area-inset-left)',
+          paddingRight: 'env(safe-area-inset-right)',
+        }}
       >
         <Providers dehydratedState={dehydratedState}>
-          <Header />
-          <main className="grow">{children}</main>
-          <Footer />
+          <main className="relative grow min-h-0 overflow-hidden">{children}</main>
           <Scripts />
         </Providers>
       </body>

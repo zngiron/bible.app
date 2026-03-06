@@ -14,7 +14,7 @@ export function CardBible({ children, className }: CardBibleProps) {
     <div
       className={cn(
         'relative',
-        'aspect-[9/16] w-full overflow-hidden rounded-2xl',
+        'aspect-5/7 w-full overflow-hidden rounded-2xl',
         'bg-vintage-paper shadow-[0_8px_32px_var(--vintage-shadow)]',
         'font-serif',
         className,

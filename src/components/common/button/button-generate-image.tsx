@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface ButtonGenerateImageProps {
   reference: string;
@@ -31,17 +31,23 @@ export function ButtonGenerateImage({ reference }: ButtonGenerateImageProps) {
   }
 
   return (
-    <Button
-      variant="secondary"
-      size="sm"
+    <button
+      type="button"
       onClick={handleGenerate}
       disabled={isGenerating}
+      className={cn(
+        'flex items-center gap-1.5 rounded-full px-3 py-2',
+        'bg-vintage-paper/90 text-vintage-ink shadow-lg',
+        'text-sm font-sans',
+        'hover:bg-vintage-paper',
+        'disabled:opacity-50',
+      )}
     >
       <Sparkles
         className="size-4"
         aria-hidden="true"
       />
       {isGenerating ? 'Generating...' : 'Generate Art'}
-    </Button>
+    </button>
   );
 }

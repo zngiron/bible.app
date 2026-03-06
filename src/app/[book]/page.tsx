@@ -2,16 +2,17 @@ import type { Metadata } from 'next';
 
 import { notFound } from 'next/navigation';
 
+import { ButtonBack } from '@/components/common/button/button-back';
 import { GridVerseSpatial } from '@/components/common/grid/grid-verse-spatial';
 
 import { getQueryClient } from '@/lib/client';
 
 import { getChapterVerses } from '@/data/api/bible';
-import { getBookById } from '@/data/static/books';
+import { getBookBySlug } from '@/data/static/books';
 
 export async function generateMetadata({ params }: PageProps<'/[book]'>): Promise<Metadata> {
   const { book } = await params;
-  const bookData = getBookById(book);
+  const bookData = getBookBySlug(book);
 
   if (!bookData) return { title: 'Book Not Found' };
 
@@ -23,7 +24,7 @@ export async function generateMetadata({ params }: PageProps<'/[book]'>): Promis
 
 export default async function Page({ params }: PageProps<'/[book]'>) {
   const { book } = await params;
-  const bookData = getBookById(book);
+  const bookData = getBookBySlug(book);
 
   if (!bookData) notFound();
 
@@ -34,10 +35,14 @@ export default async function Page({ params }: PageProps<'/[book]'>) {
   });
 
   return (
-    <section className="relative h-[calc(100dvh-4rem)]">
+    <section className="relative h-full">
+      <ButtonBack
+        href={`/${bookData.testament}`}
+        label={bookData.testament === 'old' ? 'Old Testament' : 'New Testament'}
+      />
       <h1 className="sr-only">{bookData.name}</h1>
       <GridVerseSpatial
-        bookId={bookData.id}
+        bookSlug={bookData.slug}
         bookName={bookData.name}
         chapterCount={bookData.chapterCount}
       />

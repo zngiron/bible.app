@@ -3,7 +3,7 @@
 import { Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface ButtonShareProps {
   reference: string;
@@ -38,16 +38,21 @@ export function ButtonShare({ reference, text }: ButtonShareProps) {
   }
 
   return (
-    <Button
-      variant="secondary"
-      size="sm"
+    <button
+      type="button"
       onClick={handleShare}
+      className={cn(
+        'flex items-center gap-1.5 rounded-full px-3 py-2',
+        'bg-vintage-paper/90 text-vintage-ink shadow-lg',
+        'text-sm font-sans',
+        'hover:bg-vintage-paper',
+      )}
     >
       <Share2
         className="size-4"
         aria-hidden="true"
       />
       Share
-    </Button>
+    </button>
   );
 }
