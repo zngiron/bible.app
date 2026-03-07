@@ -64,8 +64,8 @@ export default async function Page({ params }: PageProps<'/[book]/[chapter]/[ver
   }
 
   const reference = `${bookData.name} ${chapter}:${verse}`;
-  const seed = bookData.order * 1000 + chapterNum * 100 + verseNum;
-  const mockImageUrl = `https://picsum.photos/seed/${seed}/600/840?grayscale&blur=1`;
+  const mockImages = ['/images/genesis-1-1.png', '/images/john-3-16.png', '/images/ecclesiastes-3:1.png'];
+  const mockImageUrl = mockImages[(bookData.order + chapterNum + verseNum) % mockImages.length];
 
   return (
     <section className={cn('relative flex items-center justify-center', 'h-full px-4')}>
@@ -74,7 +74,6 @@ export default async function Page({ params }: PageProps<'/[book]/[chapter]/[ver
       <CardVerseInteractive
         reference={reference}
         text={verseText}
-        bookName={bookData.name}
         imageUrl={mockImageUrl}
       />
 

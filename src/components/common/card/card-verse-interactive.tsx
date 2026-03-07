@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useRef } from 'react';
+import Image from 'next/image';
 
 import { motion, useMotionValue, useSpring, useTransform } from 'motion/react';
 
@@ -12,13 +13,12 @@ import { cn } from '@/lib/utils';
 interface CardVerseInteractiveProps {
   reference: string;
   text: string;
-  bookName: string;
   imageUrl?: string;
 }
 
 const springConfig = { stiffness: 300, damping: 30 };
 
-export function CardVerseInteractive({ reference, text, bookName, imageUrl }: CardVerseInteractiveProps) {
+export function CardVerseInteractive({ reference, text, imageUrl }: CardVerseInteractiveProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const dragStartX = useRef(0);
   const baseRotation = useRef(0);
@@ -116,13 +116,9 @@ export function CardVerseInteractive({ reference, text, bookName, imageUrl }: Ca
           <OrnamentBorder />
           <div
             aria-hidden="true"
-            className={cn(
-              'pointer-events-none absolute inset-0 z-20 rounded-2xl',
-              'opacity-[0.12] mix-blend-multiply',
-              'texture-grain',
-            )}
+            className={cn('pointer-events-none absolute inset-0 z-20 rounded-2xl', 'opacity-[0.12]', 'texture-grain')}
           />
-          <div className="relative z-30 flex flex-col items-center justify-center gap-6 size-full p-5 sm:p-8">
+          <div className="relative z-30 flex flex-col items-center justify-center gap-6 size-full p-8 sm:p-12">
             <BadgeVintage className="absolute top-4 right-4">{chapterVerse}</BadgeVintage>
             <blockquote className={cn('text-center text-pretty text-lg leading-relaxed', 'text-vintage-ink')}>
               &ldquo;{text}&rdquo;
@@ -142,11 +138,12 @@ export function CardVerseInteractive({ reference, text, bookName, imageUrl }: Ca
           style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
         >
           <div className="absolute inset-2 z-30 overflow-hidden rounded-xl">
-            <BadgeVintage className="absolute top-2 right-2 z-10">{chapterVerse}</BadgeVintage>
             {imageUrl ? (
-              <div
-                className="size-full rounded-xl bg-cover bg-center mix-blend-multiply opacity-80"
-                style={{ backgroundImage: `url(${imageUrl})`, filter: 'contrast(1.5)' }}
+              <Image
+                src={imageUrl}
+                alt=""
+                fill
+                className="object-cover rounded-xl mix-blend-multiply"
               />
             ) : (
               <div className="flex items-center justify-center size-full">
@@ -155,29 +152,25 @@ export function CardVerseInteractive({ reference, text, bookName, imageUrl }: Ca
             )}
             <span
               className={cn(
-                'absolute bottom-12 left-1/2 -translate-x-1/2',
-                'rounded-full px-4 py-1.5',
-                'bg-background/80 text-vintage-paper',
-                'text-xs font-sans font-semibold whitespace-nowrap',
+                'absolute right-4 bottom-4',
+                'text-black mix-blend-overlay opacity-50',
+                'text-7xl font-sans font-black tracking-tighter uppercase whitespace-nowrap leading-none',
               )}
+              style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
             >
-              {bookName}
+              {reference}
             </span>
           </div>
           <div
-            className={cn('absolute inset-2 z-40 rounded-xl pointer-events-none', 'border-2 border-vintage-gold/60')}
+            className={cn('absolute inset-2 z-40 rounded-xl pointer-events-none', 'border-2 border-vintage-paper/60')}
           />
           <OrnamentBorder
             className="z-40"
-            colorClassName="text-vintage-gold/60"
+            colorClassName="text-vintage-paper/60"
           />
           <div
             aria-hidden="true"
-            className={cn(
-              'pointer-events-none absolute inset-0 z-40 rounded-2xl',
-              'opacity-[0.12] mix-blend-multiply',
-              'texture-grain',
-            )}
+            className={cn('pointer-events-none absolute inset-0 z-40 rounded-2xl', 'opacity-[0.12]')}
           />
         </div>
       </motion.div>
