@@ -1,178 +1,186 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef } from 'react';
 
-import { X } from 'lucide-react';
-import { AnimatePresence, motion, useTransform } from 'motion/react';
+import { motion, useMotionValue, useSpring, useTransform } from 'motion/react';
 
-import { CardBible } from '@/components/common/card/card-bible';
+import { BadgeVintage } from '@/components/common/badge/badge-vintage';
+import { OrnamentBorder } from '@/components/common/card/ornament-border';
 
 import { cn } from '@/lib/utils';
-
-import { useCardFlip } from '@/hooks/useCardFlip.hook';
-import { useCardTilt } from '@/hooks/useCardTilt.hook';
 
 interface CardVerseInteractiveProps {
   reference: string;
   text: string;
+  bookName: string;
   imageUrl?: string;
 }
 
-export function CardVerseInteractive({ reference, text, imageUrl }: CardVerseInteractiveProps) {
+const springConfig = { stiffness: 300, damping: 30 };
+
+export function CardVerseInteractive({ reference, text, bookName, imageUrl }: CardVerseInteractiveProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { rotateY, isFlipped, handleDragUpdate, handleDragSnap, flipCard } = useCardFlip();
-  const { tiltX, tiltY, handlePointerMove, handlePointerLeave } = useCardTilt(containerRef);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const dragStartX = useRef(0);
+  const baseRotation = useRef(0);
+  const isDragging = useRef(false);
 
-  const combinedRotateY = useTransform([rotateY, tiltY], ([flip, tilt]) => (flip as number) + (tilt as number));
-  const frontOpacity = useTransform(rotateY, [-90, -89, 89, 90], [0, 1, 1, 0]);
-  const backOpacity = useTransform(rotateY, [-90, -89, 89, 90], [1, 0, 0, 1]);
+  const rawRotateY = useMotionValue(0);
+  const rotateY = useSpring(rawRotateY, springConfig);
+  const hoverTiltY = useSpring(0, springConfig);
+  const combinedRotateY = useTransform(() => rotateY.get() + hoverTiltY.get());
+  const rotateX = useSpring(0, springConfig);
 
-  const handleClick = useCallback(() => {
-    setIsExpanded(true);
-  }, []);
+  const chapterVerse = reference.split(' ').pop();
 
-  const handleClose = useCallback(() => {
-    setIsExpanded(false);
-  }, []);
+  const handlePointerDown = useCallback(
+    (event: React.PointerEvent) => {
+      isDragging.current = true;
+      dragStartX.current = event.clientX;
+      baseRotation.current = rawRotateY.get();
+      hoverTiltY.set(0);
+      (event.target as HTMLElement).setPointerCapture(event.pointerId);
+    },
+    [rawRotateY, hoverTiltY],
+  );
+
+  const handlePointerMove = useCallback(
+    (event: React.PointerEvent) => {
+      if (!containerRef.current) return;
+
+      const rect = containerRef.current.getBoundingClientRect();
+      const normalizedX = (event.clientX - rect.left) / rect.width - 0.5;
+      const normalizedY = (event.clientY - rect.top) / rect.height - 0.5;
+
+      if (isDragging.current) {
+        const dx = event.clientX - dragStartX.current;
+        const sensitivity = 0.6;
+        rawRotateY.set(baseRotation.current + dx * sensitivity);
+        rotateX.set(-normalizedY * 10);
+      } else {
+        rotateX.set(-normalizedY * 15);
+        hoverTiltY.set(normalizedX * 15);
+      }
+    },
+    [rawRotateY, rotateX, hoverTiltY],
+  );
+
+  const handlePointerUp = useCallback(() => {
+    if (!isDragging.current) return;
+    isDragging.current = false;
+
+    const current = rawRotateY.get();
+    const normalized = ((current % 360) + 360) % 360;
+    const snapTo = normalized > 90 && normalized < 270 ? 180 : 0;
+
+    const fullTurns = Math.round(current / 360) * 360;
+    rawRotateY.set(fullTurns + snapTo);
+  }, [rawRotateY]);
+
+  const handlePointerLeave = useCallback(() => {
+    if (!isDragging.current) {
+      rotateX.set(0);
+      hoverTiltY.set(0);
+    }
+  }, [rotateX, hoverTiltY]);
 
   return (
-    <>
-      <div
-        ref={containerRef}
-        className="mx-auto w-full max-w-[260px] sm:max-w-sm"
-        style={{ perspective: '1200px' }}
-        onPointerMove={handlePointerMove}
-        onPointerLeave={handlePointerLeave}
+    <div
+      ref={containerRef}
+      className="mx-auto w-full max-w-xs sm:max-w-md touch-none"
+      style={{ perspective: '1200px' }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={handlePointerLeave}
+      onPointerCancel={handlePointerUp}
+    >
+      <motion.div
+        style={{
+          rotateX,
+          rotateY: combinedRotateY,
+          transformStyle: 'preserve-3d',
+        }}
+        className="relative cursor-grab active:cursor-grabbing"
       >
-        <motion.div
-          drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0}
-          onDrag={(_, info) => handleDragUpdate(info)}
-          onDragEnd={() => handleDragSnap()}
-          onDoubleClick={flipCard}
-          onClick={handleClick}
-          style={{ rotateX: tiltX, rotateY: combinedRotateY, transformStyle: 'preserve-3d' }}
-          className="relative cursor-grab active:cursor-grabbing"
+        {/* Front face */}
+        <div
+          className={cn(
+            'relative',
+            'aspect-5/7 w-full overflow-hidden rounded-2xl',
+            'bg-vintage-paper shadow-[0_8px_32px_var(--vintage-shadow)]',
+            'font-serif',
+          )}
+          style={{ backfaceVisibility: 'hidden' }}
         >
-          <motion.div style={{ opacity: frontOpacity, backfaceVisibility: 'hidden' }}>
-            <CardBible className="bg-vintage-paper">
-              {imageUrl ? (
-                <div
-                  className="absolute inset-3 z-10 rounded-lg bg-cover bg-center"
-                  style={{ backgroundImage: `url(${imageUrl})` }}
-                />
-              ) : (
-                <div className={cn('flex flex-col items-center justify-center gap-4 size-full', 'text-vintage-ink/30')}>
-                  <svg
-                    className="size-16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1"
-                    aria-hidden="true"
-                  >
-                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
-                  </svg>
-                  <p className="text-sm font-sans">{reference}</p>
-                </div>
-              )}
-            </CardBible>
-          </motion.div>
-
-          <motion.div
-            style={{ opacity: backOpacity, backfaceVisibility: 'hidden', rotateY: 180 }}
-            className="absolute inset-0"
-          >
-            <CardBible className="bg-vintage-paper">
-              <div className="flex flex-col items-center justify-center gap-6 size-full px-2">
-                <blockquote className={cn('text-center text-lg leading-relaxed', 'text-vintage-ink')}>
-                  &ldquo;{text}&rdquo;
-                </blockquote>
-                <cite className={cn('not-italic text-sm', 'text-vintage-ink/60 font-sans')}>{reference}</cite>
-              </div>
-            </CardBible>
-          </motion.div>
-        </motion.div>
-      </div>
-
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
+          <div className={cn('absolute inset-2 rounded-xl', 'border-2 border-vintage-gold/60')} />
+          <OrnamentBorder />
+          <div
+            aria-hidden="true"
             className={cn(
-              'fixed inset-0 z-50',
-              'flex flex-col items-center justify-center',
-              'bg-background/95 backdrop-blur-md',
+              'pointer-events-none absolute inset-0 z-20 rounded-2xl',
+              'opacity-[0.12] mix-blend-multiply',
+              'texture-grain',
             )}
-            role="dialog"
-            aria-modal="true"
-            aria-label={reference}
-          >
-            <button
-              type="button"
-              onClick={handleClose}
-              className={cn(
-                'absolute top-4 right-4',
-                'flex items-center justify-center size-10 rounded-full',
-                'bg-vintage-paper/90 text-vintage-ink shadow-lg',
-                'hover:bg-vintage-paper',
-              )}
-              aria-label="Close"
-            >
-              <X
-                className="size-5"
-                aria-hidden="true"
-              />
-            </button>
+          />
+          <div className="relative z-30 flex flex-col items-center justify-center gap-6 size-full p-5 sm:p-8">
+            <BadgeVintage className="absolute top-4 right-4">{chapterVerse}</BadgeVintage>
+            <blockquote className={cn('text-center text-pretty text-lg leading-relaxed', 'text-vintage-ink')}>
+              &ldquo;{text}&rdquo;
+            </blockquote>
+            <cite className={cn('not-italic text-sm text-balance', 'text-vintage-ink/60 font-sans')}>{reference}</cite>
+          </div>
+        </div>
 
-            {isFlipped ? (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, ease: 'easeOut', delay: 0.1 }}
-                className="flex flex-col items-center gap-8 px-8 max-w-lg"
-              >
-                <blockquote className={cn('text-center text-2xl leading-relaxed font-serif', 'text-foreground')}>
-                  &ldquo;{text}&rdquo;
-                </blockquote>
-                <cite className={cn('not-italic text-base font-sans', 'text-muted-foreground')}>{reference}</cite>
-              </motion.div>
-            ) : imageUrl ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3, ease: 'easeOut', delay: 0.1 }}
-                className="size-full bg-cover bg-center"
-                style={{ backgroundImage: `url(${imageUrl})` }}
+        {/* Back face */}
+        <div
+          className={cn(
+            'absolute inset-0',
+            'aspect-5/7 w-full overflow-hidden rounded-2xl',
+            'bg-vintage-paper shadow-[0_8px_32px_var(--vintage-shadow)]',
+            'font-serif',
+          )}
+          style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+        >
+          <div className="absolute inset-2 z-30 overflow-hidden rounded-xl">
+            <BadgeVintage className="absolute top-2 right-2 z-10">{chapterVerse}</BadgeVintage>
+            {imageUrl ? (
+              <div
+                className="size-full rounded-xl bg-cover bg-center mix-blend-multiply opacity-80"
+                style={{ backgroundImage: `url(${imageUrl})`, filter: 'contrast(1.5)' }}
               />
             ) : (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, ease: 'easeOut', delay: 0.1 }}
-                className="flex flex-col items-center gap-6 px-8"
-              >
-                <svg
-                  className="size-32 text-foreground/20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="0.5"
-                  aria-hidden="true"
-                >
-                  <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
-                </svg>
-                <p className={cn('text-lg font-serif', 'text-muted-foreground')}>{reference}</p>
-              </motion.div>
+              <div className="flex items-center justify-center size-full">
+                <p className="text-vintage-ink text-sm font-sans">No image available</p>
+              </div>
             )}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+            <span
+              className={cn(
+                'absolute bottom-12 left-1/2 -translate-x-1/2',
+                'rounded-full px-4 py-1.5',
+                'bg-background/80 text-vintage-paper',
+                'text-xs font-sans font-semibold whitespace-nowrap',
+              )}
+            >
+              {bookName}
+            </span>
+          </div>
+          <div
+            className={cn('absolute inset-2 z-40 rounded-xl pointer-events-none', 'border-2 border-vintage-gold/60')}
+          />
+          <OrnamentBorder
+            className="z-40"
+            colorClassName="text-vintage-gold/60"
+          />
+          <div
+            aria-hidden="true"
+            className={cn(
+              'pointer-events-none absolute inset-0 z-40 rounded-2xl',
+              'opacity-[0.12] mix-blend-multiply',
+              'texture-grain',
+            )}
+          />
+        </div>
+      </motion.div>
+    </div>
   );
 }

@@ -35,7 +35,7 @@ export function ChapterNav({ loadedChapters, chapterCount, onChapterSelect, book
   return (
     <div
       ref={navRef}
-      className="absolute top-4 right-4 z-30"
+      className="absolute top-4 md:top-14 right-4 z-30"
     >
       <button
         type="button"
@@ -78,7 +78,7 @@ export function ChapterNav({ loadedChapters, chapterCount, onChapterSelect, book
                   className={cn(
                     'flex items-center justify-center size-6 rounded-full',
                     'text-xs',
-                    isActive ? 'bg-vintage-gold/30 text-vintage-ink' : 'bg-vintage-border/20 text-vintage-ink/40',
+                    isActive ? 'bg-background/30 text-vintage-ink' : 'bg-vintage-border/20 text-vintage-ink/40',
                   )}
                 >
                   {chapter}

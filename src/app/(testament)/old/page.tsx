@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 
-import { ButtonBack } from '@/components/common/button/button-back';
 import { GridBookSpatial } from '@/components/common/grid/grid-book-spatial';
 
 import { getBooksByTestament } from '@/data/static/books';
@@ -15,10 +14,6 @@ export default function Page() {
 
   return (
     <section className="relative h-full">
-      <ButtonBack
-        href="/"
-        label="Home"
-      />
       <h1 className="sr-only">Old Testament</h1>
       <GridBookSpatial books={books} />
     </section>

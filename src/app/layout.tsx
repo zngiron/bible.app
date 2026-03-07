@@ -6,6 +6,7 @@ import { dehydrate } from '@tanstack/react-query';
 
 import { Providers } from '@/components/core/providers';
 import { Scripts } from '@/components/core/scripts';
+import { NavBar } from '@/components/layout/nav-bar';
 
 import { getQueryClient } from '@/lib/client';
 import { env } from '@/lib/env';
@@ -83,7 +84,8 @@ function RootLayout({ children }: LayoutProps<'/'>) {
         }}
       >
         <Providers dehydratedState={dehydratedState}>
-          <main className="relative grow min-h-0 overflow-hidden">{children}</main>
+          <NavBar />
+          <main className="relative grow min-h-0 overflow-hidden pb-20">{children}</main>
           <Scripts />
         </Providers>
       </body>

@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 
 import { notFound } from 'next/navigation';
 
-import { ButtonBack } from '@/components/common/button/button-back';
 import { GridVerseSpatial } from '@/components/common/grid/grid-verse-spatial';
 
 import { getQueryClient } from '@/lib/client';
@@ -36,10 +35,6 @@ export default async function Page({ params }: PageProps<'/[book]'>) {
 
   return (
     <section className="relative h-full">
-      <ButtonBack
-        href={`/${bookData.testament}`}
-        label={bookData.testament === 'old' ? 'Old Testament' : 'New Testament'}
-      />
       <h1 className="sr-only">{bookData.name}</h1>
       <GridVerseSpatial
         bookSlug={bookData.slug}

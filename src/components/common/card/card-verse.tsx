@@ -4,9 +4,10 @@ import Link from 'next/link';
 
 import { motion } from 'motion/react';
 
+import { BadgeVintage } from '@/components/common/badge/badge-vintage';
 import { CardBible } from '@/components/common/card/card-bible';
 
-import { springSnappy } from '@/lib/spring-presets';
+import { maxStaggerDelay, springSnappy, staggerDelay } from '@/lib/spring-presets';
 import { cn } from '@/lib/utils';
 
 interface CardVerseProps {
@@ -16,40 +17,40 @@ interface CardVerseProps {
   verse: number;
   text: string;
   index: number;
+  animated?: boolean;
 }
 
-export function CardVerse({ bookSlug, bookName, chapter, verse, text, index }: CardVerseProps) {
-  const truncatedText = text.length > 80 ? `${text.slice(0, 80)}...` : text;
+export function CardVerse({ bookSlug, bookName, chapter, verse, text, index, animated = true }: CardVerseProps) {
+  const content = (
+    <Link
+      href={`/${bookSlug}/${chapter}/${verse}`}
+      className="block focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring rounded-2xl"
+    >
+      <CardBible>
+        <BadgeVintage className="absolute top-4 right-4">
+          {chapter}:{verse}
+        </BadgeVintage>
+        <p className={cn('text-center text-pretty text-sm leading-relaxed line-clamp-5', 'text-vintage-ink/80')}>
+          {text}
+        </p>
+        <p className={cn('mt-3 text-center text-balance text-xs', 'text-vintage-ink/40 font-sans')}>
+          {bookName} {chapter}:{verse}
+        </p>
+      </CardBible>
+    </Link>
+  );
+
+  if (!animated) return content;
 
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: Math.min(index * 0.015, 0.5), ...springSnappy }}
+      transition={{ delay: Math.min(index * staggerDelay, maxStaggerDelay), ...springSnappy }}
       whileHover={{ scale: 1.04, zIndex: 10 }}
       className="relative"
     >
-      <Link
-        href={`/${bookSlug}/${chapter}/${verse}`}
-        className="block focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring rounded-2xl"
-      >
-        <CardBible>
-          <span
-            className={cn(
-              'absolute top-3 right-3',
-              'flex items-center justify-center size-7 rounded-full',
-              'bg-vintage-gold/20 text-vintage-ink/60',
-              'text-xs font-sans',
-            )}
-          >
-            {chapter}:{verse}
-          </span>
-          <p className={cn('text-center text-sm leading-relaxed', 'text-vintage-ink/80')}>{truncatedText}</p>
-          <p className={cn('mt-3 text-center text-xs', 'text-vintage-ink/40 font-sans')}>
-            {bookName} {chapter}:{verse}
-          </p>
-        </CardBible>
-      </Link>
+      {content}
     </motion.div>
   );
 }

@@ -23,10 +23,10 @@ export default function Page(_: PageProps<'/'>) {
           'transition-colors hover:bg-secondary/20',
         )}
       >
-        <div className="w-full max-w-[200px] p-4 sm:max-w-[280px] sm:p-8">
+        <div className="w-full max-w-[280px] p-4 sm:max-w-[360px] sm:p-8">
           <CardBible>
-            <p className={cn('text-center text-xl font-medium', 'text-vintage-ink')}>Old Testament</p>
-            <p className={cn('mt-2 text-center text-xs', 'text-vintage-ink/50 font-sans')}>39 Books</p>
+            <p className={cn('text-center text-2xl font-medium', 'text-vintage-ink')}>Old Testament</p>
+            <p className={cn('mt-2 text-center text-sm', 'text-vintage-ink/50 font-sans')}>39 Books</p>
           </CardBible>
         </div>
       </Link>
@@ -35,10 +35,10 @@ export default function Page(_: PageProps<'/'>) {
         href="/new"
         className={cn('group relative', 'flex items-center justify-center', 'transition-colors hover:bg-secondary/20')}
       >
-        <div className="w-full max-w-[200px] p-4 sm:max-w-[280px] sm:p-8">
+        <div className="w-full max-w-[280px] p-4 sm:max-w-[360px] sm:p-8">
           <CardBible>
-            <p className={cn('text-center text-xl font-medium', 'text-vintage-ink')}>New Testament</p>
-            <p className={cn('mt-2 text-center text-xs', 'text-vintage-ink/50 font-sans')}>27 Books</p>
+            <p className={cn('text-center text-2xl font-medium', 'text-vintage-ink')}>New Testament</p>
+            <p className={cn('mt-2 text-center text-sm', 'text-vintage-ink/50 font-sans')}>27 Books</p>
           </CardBible>
         </div>
       </Link>

@@ -2,13 +2,14 @@
 
 import type { BibleBook } from '@/data/static/books';
 
-import { useRef, useState } from 'react';
-
 import { motion } from 'motion/react';
 
 import { CardBook } from '@/components/common/card/card-book';
+import { ScatteredCard } from '@/components/common/grid/scattered-card';
 
 import { cn } from '@/lib/utils';
+
+import { useSpatialDrag } from '@/hooks/useSpatialDrag.hook';
 
 interface GridBookSpatialProps {
   books: readonly BibleBook[];
@@ -16,8 +17,7 @@ interface GridBookSpatialProps {
 }
 
 export function GridBookSpatial({ books, offsetIndex = 0 }: GridBookSpatialProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
+  const { containerRef, dragProps, cursorClassName } = useSpatialDrag();
 
   return (
     <div
@@ -25,35 +25,31 @@ export function GridBookSpatial({ books, offsetIndex = 0 }: GridBookSpatialProps
       className="relative size-full overflow-hidden"
     >
       <motion.div
-        drag
-        dragConstraints={containerRef}
-        dragElastic={0.1}
-        dragTransition={{ bounceStiffness: 300, bounceDamping: 30 }}
-        onDragStart={() => setIsDragging(true)}
-        onDragEnd={() => setIsDragging(false)}
-        className={cn('inline-grid gap-8 p-8', isDragging ? 'cursor-grabbing' : 'cursor-grab')}
+        {...dragProps}
+        className={cn(
+          'grid gap-4 p-4 sm:gap-6 sm:p-6 md:gap-8 md:p-8',
+          '[--card-min:8rem] sm:[--card-min:10rem] md:[--card-min:18rem]',
+          cursorClassName,
+        )}
         style={{
-          touchAction: 'none',
-          minWidth: '200%',
-          minHeight: '200%',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+          touchAction: 'pan-x',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(min(var(--card-min), 100%), 1fr))',
+          minHeight: '150%',
         }}
       >
         {books.map((book, index) => (
-          <CardBook
+          <ScatteredCard
             key={book.id}
-            book={book}
             index={index + offsetIndex}
-          />
+          >
+            <CardBook
+              book={book}
+              index={index + offsetIndex}
+              animated={false}
+            />
+          </ScatteredCard>
         ))}
       </motion.div>
-
-      <div
-        className={cn(
-          'pointer-events-none absolute inset-0 z-10',
-          'bg-linear-to-t from-background/60 via-transparent to-background/30',
-        )}
-      />
     </div>
   );
 }

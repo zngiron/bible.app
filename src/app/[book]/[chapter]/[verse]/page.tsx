@@ -2,11 +2,9 @@ import type { Metadata } from 'next';
 
 import { notFound } from 'next/navigation';
 
-import { ButtonBack } from '@/components/common/button/button-back';
 import { ButtonGenerateImage } from '@/components/common/button/button-generate-image';
 import { ButtonShare } from '@/components/common/button/button-share';
 import { CardVerseInteractive } from '@/components/common/card/card-verse-interactive';
-import { ChapterNav } from '@/components/common/nav/chapter-nav';
 import { VerseNav } from '@/components/common/nav/verse-nav';
 
 import { cn } from '@/lib/utils';
@@ -71,22 +69,25 @@ export default async function Page({ params }: PageProps<'/[book]/[chapter]/[ver
 
   return (
     <section className={cn('relative flex items-center justify-center', 'h-full px-4')}>
-      <ButtonBack
-        href={`/${book}`}
-        label={bookData.name}
-      />
-      <ChapterNav
-        loadedChapters={chapterNum}
-        chapterCount={bookData.chapterCount}
-        bookSlug={book}
-      />
       <h1 className="sr-only">{reference}</h1>
 
       <CardVerseInteractive
         reference={reference}
         text={verseText}
+        bookName={bookData.name}
         imageUrl={mockImageUrl}
       />
+
+      <div className={cn('absolute bottom-24 left-0 right-0 z-30', 'flex items-center justify-center gap-3')}>
+        <ButtonShare
+          reference={reference}
+          text={verseText}
+        />
+        <ButtonGenerateImage
+          reference={reference}
+          verseText={verseText}
+        />
+      </div>
 
       <VerseNav
         bookSlug={book}
@@ -95,24 +96,6 @@ export default async function Page({ params }: PageProps<'/[book]/[chapter]/[ver
         chapterCount={bookData.chapterCount}
         totalVersesInChapter={totalVersesInChapter}
       />
-
-      <div className={cn('absolute bottom-4 left-0 right-0', 'flex flex-col items-center gap-3 px-4')}>
-        <p
-          className={cn('max-w-sm text-center text-pretty text-xs leading-relaxed font-serif', 'text-muted-foreground')}
-        >
-          &ldquo;{verseText}&rdquo;
-        </p>
-        <div className="flex items-center gap-3">
-          <ButtonShare
-            reference={reference}
-            text={verseText}
-          />
-          <ButtonGenerateImage
-            reference={reference}
-            verseText={verseText}
-          />
-        </div>
-      </div>
     </section>
   );
 }

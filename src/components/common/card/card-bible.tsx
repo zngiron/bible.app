@@ -7,9 +7,10 @@ import { cn } from '@/lib/utils';
 interface CardBibleProps {
   children: ReactNode;
   className?: string;
+  contentClassName?: string;
 }
 
-export function CardBible({ children, className }: CardBibleProps) {
+export function CardBible({ children, className, contentClassName }: CardBibleProps) {
   return (
     <div
       className={cn(
@@ -20,9 +21,21 @@ export function CardBible({ children, className }: CardBibleProps) {
         className,
       )}
     >
-      <div className={cn('absolute inset-1.5 rounded-xl', 'border border-vintage-border/40')} />
+      <div className={cn('absolute inset-2 rounded-xl', 'border-2 border-vintage-gold/60')} />
       <OrnamentBorder />
-      <div className="relative flex flex-col items-center justify-center size-full p-6">{children}</div>
+      <div
+        aria-hidden="true"
+        className={cn(
+          'pointer-events-none absolute inset-0 z-20 rounded-2xl',
+          'opacity-[0.12] mix-blend-multiply',
+          'texture-grain',
+        )}
+      />
+      <div
+        className={cn('relative z-30 flex flex-col items-center justify-center size-full p-5 sm:p-8', contentClassName)}
+      >
+        {children}
+      </div>
     </div>
   );
 }

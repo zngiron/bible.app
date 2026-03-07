@@ -6,9 +6,17 @@ import { useReducedMotion, useSpring } from 'motion/react';
 
 import { springSnappy } from '@/lib/spring-presets';
 
-const maxTilt = 20;
+interface CardTiltOptions {
+  maxTilt?: number;
+  global?: boolean;
+}
 
-export function useCardTilt(containerRef: RefObject<HTMLDivElement | null>) {
+const defaultMaxTilt = 20;
+
+export function useCardTilt(containerRef: RefObject<HTMLDivElement | null>, options: CardTiltOptions | number = {}) {
+  const { maxTilt = defaultMaxTilt, global: globalTracking = false } =
+    typeof options === 'number' ? { maxTilt: options } : options;
+
   const shouldReduceMotion = useReducedMotion();
   const [hasGyroscope, setHasGyroscope] = useState(false);
 
@@ -28,12 +36,31 @@ export function useCardTilt(containerRef: RefObject<HTMLDivElement | null>) {
       tiltX.set(clampedBeta);
       tiltY.set(clampedGamma);
     },
-    [shouldReduceMotion, tiltX, tiltY],
+    [shouldReduceMotion, maxTilt, tiltX, tiltY],
   );
 
   useEffect(() => {
     if (shouldReduceMotion) return;
     if (typeof window === 'undefined' || !('DeviceOrientationEvent' in window)) return;
+
+    const requiredEvents = 3;
+    let validEventCount = 0;
+    let probeCleanup: (() => void) | undefined;
+
+    function probeOrientation(event: DeviceOrientationEvent) {
+      if (event.alpha === null && event.beta === null && event.gamma === null) return;
+
+      validEventCount++;
+      if (validEventCount >= requiredEvents) {
+        setHasGyroscope(true);
+        probeCleanup?.();
+      }
+    }
+
+    function startProbe() {
+      window.addEventListener('deviceorientation', probeOrientation);
+      probeCleanup = () => window.removeEventListener('deviceorientation', probeOrientation);
+    }
 
     async function requestPermission() {
       const DeviceOrientation = DeviceOrientationEvent as unknown as {
@@ -44,17 +71,19 @@ export function useCardTilt(containerRef: RefObject<HTMLDivElement | null>) {
         try {
           const permission = await DeviceOrientation.requestPermission();
           if (permission === 'granted') {
-            setHasGyroscope(true);
+            startProbe();
           }
         } catch {
           setHasGyroscope(false);
         }
       } else {
-        setHasGyroscope(true);
+        startProbe();
       }
     }
 
     requestPermission();
+
+    return () => probeCleanup?.();
   }, [shouldReduceMotion]);
 
   useEffect(() => {
@@ -64,8 +93,23 @@ export function useCardTilt(containerRef: RefObject<HTMLDivElement | null>) {
     return () => window.removeEventListener('deviceorientation', handleOrientation);
   }, [hasGyroscope, shouldReduceMotion, handleOrientation]);
 
+  useEffect(() => {
+    if (!globalTracking || shouldReduceMotion || hasGyroscope) return;
+
+    function onMouseMove(event: MouseEvent) {
+      const normalizedX = event.clientX / window.innerWidth - 0.5;
+      const normalizedY = event.clientY / window.innerHeight - 0.5;
+
+      tiltX.set(normalizedY * maxTilt);
+      tiltY.set(-normalizedX * maxTilt);
+    }
+
+    window.addEventListener('mousemove', onMouseMove);
+    return () => window.removeEventListener('mousemove', onMouseMove);
+  }, [globalTracking, shouldReduceMotion, hasGyroscope, maxTilt, tiltX, tiltY]);
+
   function handlePointerMove(event: React.PointerEvent<HTMLDivElement>) {
-    if (shouldReduceMotion || hasGyroscope) return;
+    if (shouldReduceMotion || hasGyroscope || globalTracking) return;
 
     const element = containerRef.current;
     if (!element) return;
@@ -79,7 +123,7 @@ export function useCardTilt(containerRef: RefObject<HTMLDivElement | null>) {
   }
 
   function handlePointerLeave() {
-    if (hasGyroscope) return;
+    if (hasGyroscope || globalTracking) return;
     tiltX.set(0);
     tiltY.set(0);
   }
